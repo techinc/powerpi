@@ -1,0 +1,14 @@
+[Unit]
+Description=PowerPi power monitoring service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python -u main.py
+WorkingDirectory=/home/pi/powerpi
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
