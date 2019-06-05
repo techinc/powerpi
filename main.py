@@ -36,14 +36,14 @@ def on_mqtt_connect(client, userdata, flags, rc):
 
 def send_mqtt_temp(ttt,temp):
     payload = json_sensor_template % ( unix_time(ttt), "temperature", str(temp),'celsius')
-    mqtt_client.publish("%s/%s/%s" % (sensor_root , sensor_name, 'data'), "[ %s ]" % ( payload ))
+    mqtt_client.publish("%s/%s/%s" % (sensor_root , sensor_name, 'temp'), "[ %s ]" % ( payload ))
 
 def send_mqtt_power(ttt, ticks, instapower):
     payload_ticks = json_sensor_template % (unix_time(ttt), "ticks" , str(ticks),'count')
     payload_power = json_sensor_template % (unix_time(ttt), 'power' , "%.3f" % (instapower*1000),'watt')
     payload_current = json_sensor_template % (unix_time(ttt), 'current', "%.3f" % (instapower*1000/voltage), 'Amperes')
     payload_consumed_power = json_sensor_template % (unix_time(ttt), 'consumed_power', "%.3f" % (0.001*ticks), 'kW/h')
-    mqtt_client.publish("%s/%s/%s" % (sensor_root, sensor_name, 'data'), "[ %s , %s , %s , %s ]" % ( payload_ticks, payload_power, payload_current, payload_consumed_power))
+    mqtt_client.publish("%s/%s/%s" % (sensor_root, sensor_name, 'power'), "[ %s , %s , %s , %s ]" % ( payload_ticks, payload_power, payload_current, payload_consumed_power))
 
 
 mqtt_client = mqtt.Client()
@@ -51,10 +51,11 @@ mqtt_client.on_connect = on_mqtt_connect
 mqtt_client.connect(broker_address, 1883, 60)
 
 
+
 def callback_edgedown(channel):
     global ticks
     ticks+= 1
-#    print "puls"
+    #print "puls"
 
 def show_power():
     global disp, draw, image1, font40
@@ -142,11 +143,12 @@ show_power()
 
 lasttt= ticktt= datetime.now()
 lastticks= 0
+print "starting main loop"
 while 1:
     DS.pinsStartConversion([onewire])
-#    time.sleep(0.75)
+    time.sleep(0.75)
 
-    temp=99.9
+    temp=26.1
     for i in sensors:
         temp= DS.read(False,onewire,i)
 #    print temp
@@ -165,7 +167,7 @@ while 1:
         # calc kw/h
         timedelta= (ttt-ticktt).total_seconds()
         instapower= (3.6*(ticks-lastticks))/timedelta
-#        print instapower
+        #print instapower
         send_mqtt_power(ttt,ticks,instapower)
         disp.AnimateTickInImage()
         ticks_daily+= ticks-lastticks
