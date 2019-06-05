@@ -27,7 +27,7 @@ ticks_daily= 0
 ticks_monthly= 0
 instapower= 0
 temp= 99.9
-3
+
 def unix_time(ttt):
     return((ttt- datetime(1970,1,1)).total_seconds())
 
